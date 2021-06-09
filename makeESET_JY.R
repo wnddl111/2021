@@ -1,4 +1,3 @@
-
 library(GEOquery)
 library(stringr)
 library(dplyr)
@@ -18,7 +17,6 @@ processEXP<- function(geo_file,matrix){ #matrix가 2이상일 때 씀
   }
   return(geo_exp)
 }
-
 
 processPDATA <-function(geo_file,matrix){
   pdata=pData(geo_file[[1]])
@@ -66,29 +64,25 @@ changeGENEsymbol <-function(fdata,matrix){
     entrezgene_id')
     b=readline(': ')
     
-    i=0
-    while(i<5){
-      hsmart=useMart(dataset = "hsapiens_gene_ensembl", biomart = "ensembl")
-      
-      mygenes=fdata$col
-      
+    hsmart=useMart(dataset = "hsapiens_gene_ensembl", biomart = "ensembl")
+    mygenes=fdata[,col]
+    
+    tryCatch(
       mapping=getBM(
-        attributes = c(b, hgnc_symbol), 
+        attributes = c(b, 'hgnc_symbol'), 
         filters = b,
         values = mygenes,
-        mart = hsmart
-      )
-      i=i+1
-      if (length(mapping)>1){
-        return(mapping)
-        
-        break
-      }
-      else{
-        cat('we try to get gene symbol, but fails..
-          because of biomart server, so try again..!')
-      }
-    }
+        mart = hsmart)
+      ,
+      error = function(e){
+        mapping=getBM(
+          attributes = c(b, 'hgnc_symbol'), 
+          filters = b,
+          values = mygenes,
+          mart = hsmart
+          )
+        })
+    
     
   } 
   else {
@@ -172,16 +166,12 @@ makeESET<- function(geo_num,res,con,matrix){
   
 }
 
-res_num='21,22,26'
-con_num='19,20,25'
-#eset=makeESET('GSE158494',res_num,con_num,1)
-eset=makeESET('GSE36135',res_num,con_num,2)
+res_num='10,11,12'
+con_num='07,08,09'
+eset=makeESET('GSE158494',res_num,con_num,1)
+#eset=makeESET('GSE36135',res_num,con_num,2)
+fData(eset)
 
 res_num=readline('res sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 matrix_num=readline('series matrix 개수를 쓰세요 : ')
-
-
-
-
-

@@ -79,8 +79,7 @@ changeGENEsymbol <-function(fdata,matrix){
 }
 
 makeESET<- function(geo_num,res,con,matrix){
-  #geo_file=getGEO(geo_num)
-  geo_file=geo_num
+  geo_file=getGEO(geo_num)
   res_num=strsplit(res,',')
   con_num=strsplit(con,',')
   
@@ -152,26 +151,6 @@ matrix_num=readline('series matrix 개수를 쓰세요 : ')
 #19 20 25 sen
 #21 22  26 res
 GSE36135=getGEO('GSE36135')
-GSE
-length(intersect(rownames(exprs(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`)),
-          rownames(exprs(GSE36135$`GSE36135-GPL571_series_matrix.txt.gz`))))
-
-strsplit('15,16,17',',')
-
-
-
-
-a <-function(i){
-  print('a야')
-  return(i)
-}
-(fData(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`))$'Gene Symbol'
-
-b<-function(i){
-  a(i)
-}
-
-b(1)
 
 
 

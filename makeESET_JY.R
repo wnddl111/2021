@@ -180,30 +180,6 @@ eset=makeESET('GSE36135',res_num,con_num,2)
 res_num=readline('res sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 matrix_num=readline('series matrix 개수를 쓰세요 : ')
-#19 20 25 sen
-#21 22  26 res
-GSE36135=getGEO('GSE36135')
-exprs(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`)
-GSE
-length(intersect(rownames(exprs(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`)),
-          rownames(exprs(GSE36135$`GSE36135-GPL571_series_matrix.txt.gz`))))
-
-strsplit('15,16,17',',')
-
-
-
-
-a <-function(i){
-  print('a야')
-  return(i)
-}
-(fData(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`))$'Gene Symbol'
-
-b<-function(i){
-  a(i)
-}
-
-b(1)
 
 
 

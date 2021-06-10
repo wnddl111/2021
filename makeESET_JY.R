@@ -206,12 +206,4 @@ con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로
 matrix_num=readline('series matrix 개수를 쓰세요 : ')
 #19 20 25 sen
 #21 22  26 res
-GSE36135=getGEO('GSE36135')
-exprs(GSE36135$`GSE36135-GPL570_series_matrix.txt.gz`)
 
-GSE158494=getGEO('GSE158494')
-fData(GSE158494$GSE158494_series_matrix.txt.gz)
-
-colnames(fData(GSE36135[[1]]))
-A='GB_ACC'
-fData(GSE36135[[1]])$A

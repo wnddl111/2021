@@ -196,14 +196,17 @@ makeESET<- function(geo_num,res,con,matrix){
 res_num='10,11,12'
 con_num='07,08,09'
 
+#example
+res_num=readline('res sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
+con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
+matrix_num=readline('series matrix 개수를 쓰세요 : ')
+                      
 eset=makeESET('GSE158494',res_num,con_num,1)
 eset=makeESET('GSE36135',res_num,con_num,2)
 fData(eset)
 exprs(eset)
 pData(eset)
-res_num=readline('res sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
-con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
-matrix_num=readline('series matrix 개수를 쓰세요 : ')
+
 #19 20 25 sen
 #21 22  26 res
 

@@ -98,8 +98,11 @@ for i in range(len(fastq1)):
         os.system('STAR --runMode alignReads --runThreadN 16 --outFilterMultimapNmax 10 --alignIntronMin 61 --alignIntronMax 265006 --genomeDir '+genome_ref_dir+' --readFilesIn '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' '+wdir+project_name+'/trimming/trimmed_'+fastq2[i]+' --outFileNamePrefix '+wdir+project_name+'/mapping_sorting/star_mapsort_'+project+'_'+' --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM')
         #counting
         os.system('rsem-calculate-expression -p 8 --alignments --paired-end --strandedness reverse --no-bam-output '+wdir+project_name+'/mapping_sorting/star_mapsort_'+project+'_Aligned.toTranscriptome.out.bam '+rsem_ref_dir+' '+wdir+project_name+'/counting/count_'+project)
-
-
+        
+        #change the name of result
+        os.chdir(wdir+project_name+'/counting/')
+        result_name = 'count_'+project+'.genes.results'
+        os.system('mv '+result_name+' '+result_name+'.txt')
 
 
 

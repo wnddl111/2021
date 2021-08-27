@@ -29,7 +29,11 @@ raw_dir='/data/juyoung/rawdata/'
 if (len(fastq1) != len(fastq2)):
         os.system('echo fastq file is not matched')
         sys.exit()
-
+        
+for i in range(len(fastq1)):
+        fastq1[i] = fastq1[i][:-3]
+        fastq2[i] = fastq2[i][:-3]
+        
 #make directory
 #trimming 전후로 qc를 체크함 
 os.chdir(wdir)
@@ -43,8 +47,8 @@ cdir = os.getcwd()
 
 #qc
 for i in range(len(fastq1)):
-        os.system('gzip -d '+raw_dir+fastq1[i]+' '+raw_dir+fastq2[i])
-        os.system('fastqc -o '+cdir+'/qc/ -f fastq '+raw_dir+fastq1[i][:-3]+' '+raw_dir+fastq2[i][:-3])
+        os.system('gzip -d '+raw_dir+fastq1[i]+'.gz '+raw_dir+fastq2[i]+'.gz')
+        os.system('fastqc -o '+cdir+'/qc/ -f fastq '+raw_dir+fastq1[i]+' '+raw_dir+fastq2[i])
         
 os.chdir('./qc')#easy to move os.chdir command 
 cdir = os.getcwd()
@@ -74,9 +78,9 @@ with open('all_summary.txt', 'wb') as f: #summary.txt 가 바이너리 파일이
 #trimming        
 for i in range(len(fastq1)):
         project = project_name.replace('#',str(i+1)) # '#'을 통해서 1번 2번 3번...환자를 구분한다 
-        os.system('sickle pe -f '+raw_dir+fastq1[i][:-3]+' -r '+raw_dir+fastq2[i][:-3]+' -t sanger -o '+wdir+project_name+'/trimming/trimmed_'+fastq1[i][:-3]+' -p '+wdir+project_name+'/trimming/trimmed_'+fastq2[i][:-3]+' -s '+wdir+project_name+'/trimming/single_trimmed_'+project+' -q 20 -l 20')
-        os.system('fastqc -o '+wdir+project_name+'/qc2/ -f fastq '+wdir+project_name+'/trimming/trimmed_'+fastq1[i][:-3]+' '+wdir+project_name+'/trimming/trimmed_'+fastq2[i][:-3])
-        os.system('gzip '+raw_dir+fastq1[i][:-3]+' '+raw_dir+fastq2[i][:-3])
+        os.system('sickle pe -f '+raw_dir+fastq1[i]+' -r '+raw_dir+fastq2[i]+' -t sanger -o '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' -p '+wdir+project_name+'/trimming/trimmed_'+fastq2[i]+' -s '+wdir+project_name+'/trimming/single_trimmed_'+project+' -q 20 -l 20')
+        os.system('fastqc -o '+wdir+project_name+'/qc2/ -f fastq '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' '+wdir+project_name+'/trimming/trimmed_'+fastq2[i])
+        os.system('gzip '+raw_dir+fastq1[i]+' '+raw_dir+fastq2[i])
 
 #trimming 후 qc 진행 
 os.chdir(wdir+project_name+'/qc2/')# '/'게 있어야 이동한대 

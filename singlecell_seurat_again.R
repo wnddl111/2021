@@ -1,3 +1,6 @@
+#https://blog.naver.com/study_very_hard/222061641671
+#UMI BARCODE PCR ERROR 설명
+
 library(dplyr)
 #install.packages('Seurat')
 library(Matrix) #이거 버전이 안맞아서 처음에 안됐음

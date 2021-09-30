@@ -78,7 +78,7 @@ with open('all_summary.txt', 'wb') as f: #summary.txt 가 바이너리 파일이
 #trimming        
 for i in range(len(fastq1)):
         project = project_name.replace('#',str(i+1)) # '#'을 통해서 1번 2번 3번...환자를 구분한다 
-        os.system('sickle pe -f '+raw_dir+fastq1[i]+' -r '+raw_dir+fastq2[i]+' -t sanger -o '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' -p '+wdir+project_name+'/trimming/trimmed_'+fastq2[i]+' -s '+wdir+project_name+'/trimming/single_trimmed_'+project+' -q 20 -l 20')
+        os.system('cutadapt -a AGATCGGAAGAGC -g AGATCGGAAGAGC -q 30 -m 20 -o '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' -p '+wdir+project_name+'/trimming/trimmed_'+fastq2[i]+' '+raw_dir+fastq1[i]+' '+raw_dir+fastq2[i])
         os.system('fastqc -o '+wdir+project_name+'/qc2/ -f fastq '+wdir+project_name+'/trimming/trimmed_'+fastq1[i]+' '+wdir+project_name+'/trimming/trimmed_'+fastq2[i])
         os.system('gzip '+raw_dir+fastq1[i]+' '+raw_dir+fastq2[i])
 

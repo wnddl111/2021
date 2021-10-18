@@ -7,8 +7,11 @@ setwd('/Users/juyoung/Desktop/singlecell_jy')
 #################
 gse115978_counts=read.csv(file='/Users/juyoung/Downloads/GSE115978/GSE115978_counts.csv', header = T,row.names=1, as.is=T)
 gse115978_cell_annotations=read.csv(file='/Users/juyoung/Downloads/GSE115978/GSE115978_cell.annotations.csv',header = T,row.names=1, as.is=T)
+
+dim(gse115978_counts)#23686 7186
 gse115978<- CreateSeuratObject(counts= gse115978_counts, project = 'gse115978',min.cells = 3, min.features = 200)
 #grep("APOBEC3A-B",rownames(gse115978),value=T) #feature name이 '_'는 가진다고 warning 뜸 -> "APOBEC3A_B" "C4B_2"  -> 알아서 바꿔줌  
+gse115978 #22454 7186
 
 length(rownames(gse115978_cell_annotations))#7186
 length(colnames(gse115978))#7186
@@ -20,7 +23,7 @@ gse115978$treatment.group=gse115978_cell_annotations$treatment.group
 
 #add####################
 #sample
-gse115978$smple = gse115978_cell_annotations$sample
+gse115978$sample = gse115978_cell_annotations$sample
 #cancer_type
 gse115978$cancer_type = rep('melanoma',ncol(gse115978))
 ########################
@@ -36,7 +39,8 @@ gse115978_fu$type= rep('T',3556)
 #final check
 table(gse115978_fu$type)
 table(gse115978_fu$treatment.group)
-
+table(gse115978_fu$sample)
+table(gse115978_fu$cancer_type)
 #final save
 #save(gse115978_fu, file='/Users/juyoung/Desktop/singlecell_jy/data/gse115978_fu.rda')
 save(gse115978_fu, file='/Users/juyoung/Desktop/singlecell_jy/data/gse115978_fu_add.rda')
@@ -53,6 +57,10 @@ for (i in unique(gse115978_fu$sample)){
 }
 
 assign('melanoma', merge(object_list[[1]],y=object_list[2:16], add.cell.ids =unique(gse115978_fu$sample), project= 'melanoma'))
+
+#cehck
+VlnPlot(melanoma,features = 'nFeature_RNA') #여전히 얘네만의 orig.ident로 나옴
+Idents(melanoma)=melanoma$sample #이코드로 바꿀 수 있음
 
 ##################
 
@@ -107,8 +115,8 @@ gse123813_scc$treatment.group=ifelse(gse123813_scc_metadata$treatment=='post','F
 
 #add####################
 #sample
-gse123813_bcc$smple = tempor_gse123813_bcc_metadata$patient
-gse123813_scc$smple = gse123813_scc_metadata$patient
+gse123813_bcc$sample = tempor_gse123813_bcc_metadata$patient
+gse123813_scc$sample = gse123813_scc_metadata$patient
 #cancer_type
 gse123813_bcc$cancer_type = rep('bcc',ncol(gse123813_bcc))
 gse123813_scc$cancer_type = rep('scc',ncol(gse123813_scc))
@@ -126,14 +134,16 @@ for (i in unique(gse123813_bcc$sample)){
   object_list=append(object_list,get(i))
 }
 
-assign('bcc', merge(object_list[[1]],y=object_list[2:12], add.cell.ids =unique(gse123813_bcc$sample), project= 'bcc'))
+assign('bcc', merge(object_list[[1]],y=object_list[2:11], add.cell.ids =unique(gse123813_bcc$sample), project= 'bcc'))
 
 for (i in unique(gse123813_scc$sample)){
   object_list=append(object_list,get(i))
 }
 
 assign('scc', merge(object_list[[1]],y=object_list[2:4], add.cell.ids =unique(gse123813_scc$sample), project= 'scc'))
-########################
+
+Idents(bcc)=bcc$sample
+Idents(scc)=scc$sample
 
 ###############
 ###위암,간암###
@@ -193,7 +203,7 @@ for (i in gastric_name){
 }
 
 sample_list=list('1058BP','1058BT','1058FUP','1058FUT','3622BP','3622BT','3622FUP','3622FUT', '39054637BP','39054637BT','39054637FUP','39054637FUT','40784154BP','40784154BT', '40784154FUP','40784154FUT', '7727BP','7727BT','7727FUP','7727FUT')
-#length(sample_list) 20
+#length(sample_list) 
 assign('gastric', merge(object_list[[1]],y=object_list[2:20], add.cell.ids =sample_list, project= 'gastric'))
 ########################
 liver_name=list('liver_10665612BP',
@@ -242,18 +252,6 @@ sample_list=list('10665612BP',
                  '41226138BP',
                  '41226138FUP')
 assign('liver', merge(object_list[[1]],y=object_list[2:20], add.cell.ids =sample_list, project= 'liver'))
-#########Seurat v3 also supports the projection of reference data (or meta data) onto a query object. While many of the methods are conserved (both procedures begin by identifying anchors), there are two important distinctions between data transfer and integration:
-
-In data transfer, Seurat does not correct or modify the query expression data.
-In data transfer, Seurat has an option (set by default) to project the PCA structure of a reference onto the query, instead of learning a joint structure with CCA. We generally suggest using this option when projecting data between scRNA-seq datasets.
-After finding anchors, we use the TransferData function to classify the query cells based on reference data (a vector of reference cell type labels). TransferData returns a matrix with predicted IDs and prediction scores, which we can add to the query metadata.##
-#annotation
-###########
-
-mel
-
-
-
 
 
 ###########
@@ -272,24 +270,27 @@ Sys.setenv(R_REMOTES_NO_ERRORS_FROM_WARNINGS="true")
 install_github("mingjingsi/FIRM")
 
 #안됨 
+#window는 됨
 ###########
 
 #2.seurat integration
 #10x와 smartseq 우선은 platform끼리 merge하지말고 구분할 컬럼을 만들어서 해보자
 gastric$platform=rep('10x',ncol(gastric))
 liver$platform=rep('10x',ncol(liver))
-gse115978_fu$platform=rep('Smartseq',ncol(gse115978_fu)) #ㅎgse115978_fu를 했어야 함 
-gse123813_bcc$platform=rep('10x',ncol(gse123813_bcc))
-gse123813_scc$platform=rep('10x',ncol(gse123813_scc))
+melanoma$platform=rep('Smartseq',ncol(melanoma)) #ㅎgse115978_fu를 했어야 함 
+bcc$platform=rep('10x',ncol(bcc))
+scc$platform=rep('10x',ncol(scc))
 
 #test용이라 생각하고 복사하자
 g1=gastric
 l1=liver
-bcc=gse123813_bcc
-scc=gse123813_scc
-mel=gse115978_fu
+#bcc=bcc
+#scc=scc
+mel=melanoma
 
 #save(mel,file='./data/mel.rda')
+#save(bcc,file='./data/bcc.rda')
+#save(scc,file='./data/scc.rda')
 #####again########
 setwd('/Users/juyoung/Desktop/singlecell_jy')
 data(mel)
@@ -299,10 +300,11 @@ data(scc)
 data("l1")
 
 mel#3556
-g1#26178
-scc#17559
-bcc#22961
-l1#18221
+g1#200781
+scc#14504
+bcc#92869
+l1#37679
+
 
 library(stringr)
 
@@ -312,8 +314,27 @@ l1$type=ifelse(str_detect(l1$orig.ident,'P'),'P','T')
 g1$treatment.group=(ifelse(str_detect(g1$orig.ident,'B'),'B','FU'))
 l1$treatment.group=(ifelse(str_detect(l1$orig.ident,'B'),'B','FU'))
 
+g1$cancer_type='gastric'
+l1$cancer_type='liver'
+
+g1_sample=c('1058','3622','39054637','40784154','7727')
+
+sample=list()
+for ( i in 1:ncol(g1)){
+  sample=append(sample,print(gsub('\\D','',g1$orig.ident[i])))
+}
+
+g1[,which(grep(g1$orig.ident %in% i)]
+
+g1$sample=g1$orig.ident
+l1$sample=l1$orig.ident
+
+g1$orig.ident
+
 #MT 제거
 #mt not remove
+
+PercentageFeatureSet(mel, pattern = "^MT")
 g1[['percent.mt']] <- PercentageFeatureSet(g1,pattern='^MT-')
 l1[['percent.mt']] <- PercentageFeatureSet(l1,pattern='^MT-')
 bcc[['percent.mt']] <- PercentageFeatureSet(bcc,pattern='^MT-')

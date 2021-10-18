@@ -1,3 +1,4 @@
+
 library(GEOquery)
 library(stringr)
 library(dplyr)
@@ -51,8 +52,7 @@ changeGENEsymbol <-function(fdata,matrix){
     return(genesymbol)
   }else if(answer == 'n'){
     message('if you dont have any gene_symbol, write your type of id...
-             ex) entrezgene_id (write a replaceable real column name!!!)
-             ')
+            ex) real column name', list(colnames(fdata)))
     col=readline(': ')
     message('For changing your id, Choose one matches with yours.. 
     ensembl_gene_id
@@ -61,28 +61,29 @@ changeGENEsymbol <-function(fdata,matrix){
     ensembl_peptide_id
     hgnc_symbol
     entrezgene
-    entrezgene_id')
+    entrezgene_id
+    
+    **check biomart description**')
     b=readline(': ')
     
+  
     hsmart=useMart(dataset = "hsapiens_gene_ensembl", biomart = "ensembl")
     mygenes=fdata[,col]
     
-    tryCatch(
-      mapping=getBM(
-        attributes = c(b, 'hgnc_symbol'), 
-        filters = b,
-        values = mygenes,
-        mart = hsmart)
-      ,
-      error = function(e){
-        mapping=getBM(
-          attributes = c(b, 'hgnc_symbol'), 
-          filters = b,
-          values = mygenes,
-          mart = hsmart
-          )
-        })
+   
+    mapping=getBM(
+      attributes = c(b, 'hgnc_symbol'), 
+      filters = b,
+      values = mygenes,
+      mart = hsmart)
     
+    
+  
+    probe_id=(merge(fdata,mapping,by.x=col,by.y=b))$'ID'
+    mapping$'probe_id'=probe_id
+    message(b,' is chaneged to gene symbol perfectly')
+   
+    return(mapping)
     
   } 
   else {
@@ -108,13 +109,14 @@ makeESET<- function(geo_num,res,con,matrix){
     message('expression dimension(just finished "common row" process) : ',length(rownames(geo_exp)),' ',length(colnames(geo_exp)))
     pdata=processPDATA(geo_file,matrix)
     fdata=processFDATA(geo_file,matrix)
+    
   }
-  
   else{
     geo_exp=as.data.frame(exprs(geo_file[[1]]))
     message('expression dimension(just use one array case) : ', length(rownames(geo_exp)),' ',length(colnames(geo_exp)))
     pdata=pData(geo_file[[1]])
     fdata=fData(geo_file[[1]])
+    
   }
   
   
@@ -122,6 +124,7 @@ makeESET<- function(geo_num,res,con,matrix){
   for (i in 1:length(colnames(geo_exp))){
     colnames(geo_exp)[i]=str_sub(colnames(geo_exp)[i],-2,-1)
   }
+  
   for (i in 1:length(rownames(pdata))){
     rownames(pdata)[i]=str_sub(rownames(pdata)[i],-2,-1)
   }
@@ -131,6 +134,8 @@ makeESET<- function(geo_num,res,con,matrix){
   
   res_pdata=pdata[unlist(intersect(rownames(pdata), unlist(res_num))),]
   con_pdata=pdata[unlist(intersect(rownames(pdata), unlist(con_num))),]
+  
+
   
   message('\n')
   cat('❅。 ❅ 。 。 ゜。・゜・ 。 Final GROUP DIM❅。 ❅・。・。 ゜・ 。 。 ゜。・゜ ❅。')
@@ -142,16 +147,38 @@ makeESET<- function(geo_num,res,con,matrix){
   pdata=rbind(con_pdata,res_pdata)
   
   genesymbol=changeGENEsymbol(fdata,matrix) 
+
+  if(class(genesymbol)=='data.frame'){
+    exp=exp[genesymbol$'probe_id',]
+    fdata=as.data.frame(genesymbol[[2]])
+    genesymbol=fdata[[1]]
+    
+  }
+  
   
   a_exp=aggregate(exp,list(genesymbol),mean,na.rm=T)
-  fdata=fdata[rownames(a_exp),]
+  
+  
+  if(a_exp[1,1]==''){
+    a_exp=a_exp[-which(a_exp[[1]]==''),]
+  }
+  
   g=a_exp[,1]
   
   a_exp=a_exp[,-1]
   rownames(a_exp)=g
-  rownames(fdata)=g
   
-  
+
+  if (rownames(fdata)[1]=='1'){
+    fdata=as.data.frame(g)
+    rownames(fdata)=g
+    
+  }
+  else{
+    fdata=fdata[g,]
+    rownames(fdata)=g
+  }
+
   featureData=new("AnnotatedDataFrame", data=fdata)
   phenoData = new("AnnotatedDataFrame", data=pdata)
   eset= new('ExpressionSet', exprs=a_exp, phenoData=phenoData, featureData=featureData)
@@ -168,10 +195,18 @@ makeESET<- function(geo_num,res,con,matrix){
 
 res_num='10,11,12'
 con_num='07,08,09'
-eset=makeESET('GSE158494',res_num,con_num,1)
-#eset=makeESET('GSE36135',res_num,con_num,2)
-fData(eset)
 
+#example
 res_num=readline('res sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 con_num=readline('con sample의 끝 두자리를 쓰세요(여러개라면 , 로 구분) : ')
 matrix_num=readline('series matrix 개수를 쓰세요 : ')
+                      
+eset=makeESET('GSE158494',res_num,con_num,1)
+eset=makeESET('GSE36135',res_num,con_num,2)
+fData(eset)
+exprs(eset)
+pData(eset)
+
+#19 20 25 sen
+#21 22  26 res
+

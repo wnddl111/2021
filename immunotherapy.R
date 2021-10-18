@@ -17,6 +17,14 @@ length(colnames(gse115978_counts))#7186
 gse115978#22454 7186
 table(colnames(gse115978)==rownames(gse115978_cell_annotations))
 gse115978$treatment.group=gse115978_cell_annotations$treatment.group
+
+#add####################
+#sample
+gse115978$smple = gse115978_cell_annotations$sample
+#cancer_type
+gse115978$cancer_type = rep('melanoma',ncol(gse115978))
+########################
+
 gse115978_fu=gse115978[,which(gse115978$treatment.group=='post.treatment')]
 table(gse115978_fu$treatment.group)#all post.treatment 3556
 
@@ -30,8 +38,25 @@ table(gse115978_fu$type)
 table(gse115978_fu$treatment.group)
 
 #final save
-save(gse115978_fu, file='/Users/juyoung/Desktop/singlecell_jy/data/gse115978_fu.rda')
+#save(gse115978_fu, file='/Users/juyoung/Desktop/singlecell_jy/data/gse115978_fu.rda')
+save(gse115978_fu, file='/Users/juyoung/Desktop/singlecell_jy/data/gse115978_fu_add.rda')
+
 data(gse115978_fu)
+
+#add###############
+for ( i in unique(gse115978_fu$sample)){
+  assign(i, gse115978_fu[,which(gse115978_fu$sample==i)])
+}
+object_list=list()
+for (i in unique(gse115978_fu$sample)){
+  object_list=append(object_list,get(i))
+}
+
+assign('melanoma', merge(object_list[[1]],y=object_list[2:16], add.cell.ids =unique(gse115978_fu$sample), project= 'melanoma'))
+
+##################
+
+
 #################
 ####gse123813####
 #################
@@ -53,6 +78,7 @@ gse123813_scc$type=rep('T',ncol(gse123813_scc))
 length(colnames(gse123813_bcc))#53029 #뭐가 사라진거지?
 length(colnames(gse123813_bcc_counts))#53030
 length(rownames(gse123813_bcc_metadata))#53030
+
 
 ################################
 #없어진 친구를 찾기위해 
@@ -78,6 +104,36 @@ tempor_gse123813_bcc_metadata=gse123813_bcc_metadata[-which(rownames(gse123813_b
 gse123813_bcc$treatment.group=ifelse(tempor_gse123813_bcc_metadata$treatment=='post','FU','B')
 
 gse123813_scc$treatment.group=ifelse(gse123813_scc_metadata$treatment=='post','FU','B')
+
+#add####################
+#sample
+gse123813_bcc$smple = tempor_gse123813_bcc_metadata$patient
+gse123813_scc$smple = gse123813_scc_metadata$patient
+#cancer_type
+gse123813_bcc$cancer_type = rep('bcc',ncol(gse123813_bcc))
+gse123813_scc$cancer_type = rep('scc',ncol(gse123813_scc))
+
+for ( i in unique(gse123813_bcc$sample)){
+  assign(i, gse123813_bcc[,which(gse123813_bcc$sample==i)])
+}
+
+for ( i in unique(gse123813_scc$sample)){
+  assign(i, gse123813_scc[,which(gse123813_scc$sample==i)])
+}
+
+object_list=list()
+for (i in unique(gse123813_bcc$sample)){
+  object_list=append(object_list,get(i))
+}
+
+assign('bcc', merge(object_list[[1]],y=object_list[2:12], add.cell.ids =unique(gse123813_bcc$sample), project= 'bcc'))
+
+for (i in unique(gse123813_scc$sample)){
+  object_list=append(object_list,get(i))
+}
+
+assign('scc', merge(object_list[[1]],y=object_list[2:4], add.cell.ids =unique(gse123813_scc$sample), project= 'scc'))
+########################
 
 ###############
 ###위암,간암###

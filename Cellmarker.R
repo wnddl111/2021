@@ -1,34 +1,71 @@
-library(Seurat)
-library(SeuratObject)
-library(dplyr)
+data(16_cluster_final.rda) #최종파일 n_final로 저장됨
 
-setwd('./singlecell_jy/')
+final.markers <- FindAllMarkers(n_final, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25) #전체 마커 찾음 -> python돌
 
-data(final_singleR_annotation2) #singleR 돌려서 annotation2로 한 seurat obj (4만개)
-data("pred.final.down2") #annotation2 singleR결과 
+###############
+#cd8+ cell로 명명된 것들 끼리 비교해서 marker찾음 -> python sub_annotation~
+###############
 
-as.data.frame(pred.final.down2$labels) 
-Idents(final)=final$seurat_clusters #이렇게 하는 거 말고 좋은 방안이있나?/ findallmarker로 돌리려면 cluster가 ident가 되야해서 바꿈,,,
+cluster_markers_name <- c('cluster0_include.markers','cluster16_include.markers','cluster14_include.markers', 'cluster7_include.markers',
+                          'cluster6_include.markers','cluster5_include.markers','cluster4_include.markers',
+                          'cluster1_include.markers','cluster8_include.markers')
 
-final.markers <- FindAllMarkers(final, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
-table(findMarker$avg_log2FC > 0)#all true == only.pos=T
+cluster_num <- as.numeric(gsub('\\D','',cluster_markers_name))
 
-findMarker=as.data.frame(final.markers %>%
-  group_by(cluster) %>%
-  slice_max(n=30, order_by= avg_log2FC)) #5개는 너무 적어서 30개로 바꿈
+for (markers in cluster_markers_name){
+  ident1=as.numeric(gsub('\\D','',markers))
+  ident2=cluster_num[-which(cluster_num==ident1)]
+  
+  assign(markers, FindMarkers(n_final,ident.1 = ident1, ident.2 = ident2, min.pct = 0.25))
+  
+  write.csv(get(markers), file=paste0('./data/all_find_list/all_list_',markers,'.csv'))
+  assign(markers, as.data.frame(get(markers) %>%
+                                  slice_max(n=30, order_by = avg_log2FC)))
+  assign(paste0(markers,'_genes'), rownames(get(markers)))
+  write.csv(get(paste0(markers,'_genes')), file=paste0('./data/all_find_list/',markers,'.csv'))
+}
 
-table(findMarker$cluster)#cluster23의 경우 avg_log2FC가 positive한 경우가 별로 없나봄 3개뽑힘 (ㄴㄴ cluster에 해당되는 cell이 21개 밖에 없어서 그럼)
+###############
+#NK cell
+###############
 
+cluster_markers_name <- c('cluster13_include.markers','cluster15_include.markers')
 
+cluster_num <- as.numeric(gsub('\\D','',cluster_markers_name))
 
-findMarker_subset=findMarker[,c('cluster','gene')]
-write.csv(findMarker_subset,file='./data/findMarker.csv')
+for (markers in cluster_markers_name){
+  ident1=as.numeric(gsub('\\D','',markers))
+  ident2=cluster_num[-which(cluster_num==ident1)]
+  
+  assign(markers, FindMarkers(n_final,ident.1 = ident1, ident.2 = ident2, min.pct = 0.25))
+  
+  write.csv(get(markers), file=paste0('./data/all_find_list/all_list_',markers,'.csv'))
+  assign(markers, as.data.frame(get(markers) %>%
+                                  slice_max(n=30, order_by = avg_log2FC)))
+  assign(paste0(markers,'_genes'), rownames(get(markers)))
+  write.csv(get(paste0(markers,'_genes')), file=paste0('./data/all_find_list/',markers,'.csv'))
+}
 
-findMarker_subset = read.csv('./data/findMarker.csv')
-all_findMarker=read.csv('./data/server_all_findMarker.csv')
-table(all_findMarker$gene==findMarker_subset$gene)#f 64개나 있음 
-table(all_findMarker$cluster)
+###############
+#B cell
+###############
 
+cluster_markers_name <- c('cluster3_include.markers','cluster11_include.markers')
 
+cluster_num <- as.numeric(gsub('\\D','',cluster_markers_name))
 
-#server_all_findMarker -> n=5개로 해서 server에서 돌린 결과 
+for (markers in cluster_markers_name){
+  ident1=as.numeric(gsub('\\D','',markers))
+  ident2=cluster_num[-which(cluster_num==ident1)]
+  
+  assign(markers, FindMarkers(n_final,ident.1 = ident1, ident.2 = ident2, min.pct = 0.25))
+  
+  write.csv(get(markers), file=paste0('./data/all_find_list/all_list_',markers,'.csv'))
+  assign(markers, as.data.frame(get(markers) %>%
+                                  slice_max(n=30, order_by = avg_log2FC)))
+  assign(paste0(markers,'_genes'), rownames(get(markers)))
+  write.csv(get(paste0(markers,'_genes')), file=paste0('./data/all_find_list/',markers,'.csv'))
+}
+
+#####################
+

@@ -4,20 +4,22 @@ library(dplyr)
 
 setwd('./singlecell_jy/')
 
-data(final_singleR_annotation2) #singleR 돌려서 annotation2로 한 seurat obj
+data(final_singleR_annotation2) #singleR 돌려서 annotation2로 한 seurat obj (4만개)
 data("pred.final.down2") #annotation2 singleR결과 
 
-as.data.frame(pred.final.down2$labels)
-Idents(final)=final$seurat_clusters #이렇게 하는 거 말고 좋은 방안이있나? 
+as.data.frame(pred.final.down2$labels) 
+Idents(final)=final$seurat_clusters #이렇게 하는 거 말고 좋은 방안이있나?/ findallmarker로 돌리려면 cluster가 ident가 되야해서 바꿈,,,
+
 final.markers <- FindAllMarkers(final, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
+table(findMarker$avg_log2FC > 0)#all true == only.pos=T
 
 findMarker=as.data.frame(final.markers %>%
   group_by(cluster) %>%
-  slice_max(n=5, order_by= avg_log2FC))
+  slice_max(n=30, order_by= avg_log2FC)) #5개는 너무 적어서 30개로 바꿈
 
-table(findMarker$cluster)#cluster23의 경우 avg_log2FC가 positive한 경우가 별로 없나봄 ㄷ3개뽑힘
-(findMarker$gene)
-table(findMarker$avg_log2FC > 0)#all true
+table(findMarker$cluster)#cluster23의 경우 avg_log2FC가 positive한 경우가 별로 없나봄 3개뽑힘 (ㄴㄴ cluster에 해당되는 cell이 21개 밖에 없어서 그럼)
+
+
 
 findMarker_subset=findMarker[,c('cluster','gene')]
 write.csv(findMarker_subset,file='./data/findMarker.csv')

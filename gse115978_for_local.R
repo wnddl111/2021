@@ -22,7 +22,7 @@ project_name='immunotherapy_liver'
 for (i in sample_list_liver){
   print(i)
   assign(paste0(i,'.data'),Read10X(data.dir=paste0('./',project_name,'/',dir_name,'/run_count_',i,'/filtered_feature_bc_matrix')))
-  assign(i, CreateSeuratObject(counts=get(paste0(i,'.data')),project = i,min.cells = 3, min.features = 200))
+  assign(i, CreateSeuratObject(counts=get(paste0(i,'.data')),project = i))
   seurat=get(i)
   saveRDS(seurat,file=paste0('/data/juyoung/scRNAseq/for_local/liver_',i,'.rds'))
 }

@@ -300,8 +300,8 @@ g1 #28050 200781
 l1<-CreateSeuratObject(counts=liver@assays$RNA@counts, project='liver', min.cells = 3, min.features = 200)
 l1 #20496 37679
 
-g1$platform=rep('10x',ncol(gastric)) #g1
-l1$platform=rep('10x',ncol(liver))#l1 
+g1$platform=rep('10x',ncol(g1)) #g1
+l1$platform=rep('10x',ncol(l1))#l1 
 mel$platform=rep('Smartseq2',ncol(melanoma)) #ㅎgse115978_fu를 했어야 함 
 bcc$platform=rep('10x',ncol(bcc))
 scc$platform=rep('10x',ncol(scc))
@@ -404,7 +404,6 @@ scc <- subset(scc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.m
 
 # Visualize QC metrics as a violin plot
 VlnPlot(g1, features = c("nFeature_RNA", "nCount_RNA"), ncol = 2)
-
 #saveRDS(l1,file='./l1_last.rds')
 #saveRDS(g1,file='./g1_last.rds')
 #saveRDS(bcc,file='./bcc_last.rds')

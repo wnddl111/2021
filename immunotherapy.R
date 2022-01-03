@@ -405,8 +405,8 @@ scc <- subset(scc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.m
 # Visualize QC metrics as a violin plot
 VlnPlot(g1, features = c("nFeature_RNA", "nCount_RNA"), ncol = 2)
 
-#saveRDS(l1,file='./data/l1_last.rds')
-#saveRDS(g1,file='./data/g1_last.rds')
-#saveRDS(bcc,file='./data/bcc_last.rds')
-#saveRDS(scc,file='./data/scc_last.rds')
-#saveRDS(mel,file='./data/mel_last.rds')
+#saveRDS(l1,file='./l1_last.rds')
+#saveRDS(g1,file='./g1_last.rds')
+#saveRDS(bcc,file='./bcc_last.rds')
+#saveRDS(scc,file='./scc_last.rds')
+#saveRDS(mel,file='./mel_last.rds')

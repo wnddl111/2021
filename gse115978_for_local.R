@@ -1,3 +1,6 @@
+
+
+
 library(Seurat)
 
 sample_list_gastric=read.table(file='/data/juyoung/scRNAseq/immunotherapy_gastric/run_cellranger_count/for_R_samplelist_name.txt')
@@ -26,6 +29,15 @@ for (i in sample_list_liver){
   seurat=get(i)
   saveRDS(seurat,file=paste0('/data/juyoung/scRNAseq/for_local/liver_',i,'.rds'))
 }
+
+
+
+
+
+
+
+
+
 
 
 

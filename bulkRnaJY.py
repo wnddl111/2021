@@ -121,7 +121,7 @@ for i in range(len(fastq1)):
 '''설명 
 python3 bulkRnaJY.py fastq1-1,fastq2-1(.gz) fastq1-2,fastq2-2(.gz) 프로젝트명_#(#은 필수/1번환자 2번환자 구분하기위함)
 ######STAR INDEX########
-STAR --runThreadN 30 —-runMode genome Generate —genmoeDir /data/juyoung/ref —genomeFastaFiles /data/juyoung/ref/gencode~.fa —-sjdbGTFfile /data/juyoung/ref/gencode~.gtf —-sjdbOverhang 100
+STAR --runThreadN 30 —-runMode genomeGenerate —genmoeDir /data/juyoung/ref —genomeFastaFiles /data/juyoung/ref/gencode~.fa —-sjdbGTFfile /data/juyoung/ref/gencode~.gtf —-sjdbOverhang 100
 
 --runMode: STAR 프로그램의 실행모드 (인덱스 생성은 “genomeGenerate”로 설정함)
 --genomeDir: 참조 유전체 데이터 파일의 인덱스를 생성하고 저장할 디렉토리 

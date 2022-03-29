@@ -56,7 +56,7 @@ preprocess_deg <- function(zero_threshold, count, save_name){
   feature = as.data.frame(cbind(gene_id,type))
   rownames(feature) = feature$gene_id
   
-  return(list((norm2_log2_zero_count), (log2_zero_count), feature, col))
+  return(list((norm2_log2_zero_count), (zero_count), feature, col))
 }
 library(DESeq2)
 DEG <- function(zero_count, coldata){

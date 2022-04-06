@@ -87,10 +87,10 @@ for (i in c(0.1,0.3,0.5,1)){
   dim(vst)
   write.table(vst, file=paste0('./data/F0405_for_heatmap_',i,'.txt'), sep='\t')
   
-  write.table(res,file=paste0('./data/F0405_res_',i,'.txt'), sep='\t')
+  write.table(res_na,file=paste0('./data/F0405_res_',i,'.txt'), sep='\t')
   
   final_res=res_na[res_na$pvalue<0.05 & abs(res_na$log2FoldChange)>=1.5,]
-  write.table(res, file= paste0('./data/F0405_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(final_res, file= paste0('./data/F0405_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
   
   up_final_res = final_res[final_res$log2FoldChange >=1.5,]
   down_final_res = final_res[final_res$log2FoldChange <=-1.5,]

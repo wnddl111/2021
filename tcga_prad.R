@@ -48,15 +48,15 @@ save(tcga_crpc_grouped_eset,file = './data/tcga_crpc_grouped_eset.rda')
 
 
 ###############
+data("tcga_crpc_grouped_eset")
 #n vs t
-52+59
+59+369 #428
 n_t=f_exp[,c(n_sample,p_sample,r_sample)]
 dim(n_t)#38662 111, 480
 
 nt_p =f_pdata[c(n_sample,p_sample,r_sample),]
 table(rownames(nt_p)==colnames(n_t))#all true 110
-nt_p$n_vs_p_vs_r_group
-
+nt_p$
 library(preprocessCore)
 preprocess_deg <- function(zero_threshold, count){
   
@@ -70,7 +70,7 @@ preprocess_deg <- function(zero_threshold, count){
   message('zero_count_dim is')
   print(dim(zero_count))
   
-  type = c(rep('n',52),rep('r',58))
+  type = c(rep('n',52),rep('t',428))
   sample =colnames(zero_count)
   
   feature = as.data.frame(cbind(sample,type))
@@ -105,7 +105,7 @@ DEG <- function(zero_count, coldata){
   return(list(res_na, vst))
 }
 
-for (i in c(1)){ 
+for (i in c(0.1,0.3,0.5,1)){ 
   R = preprocess_deg(i, n_t)
   colnames(n_t)
   zero = as.data.frame(R[1])
@@ -116,7 +116,7 @@ for (i in c(1)){
   
   feature= as.data.frame(R[2])
   
-  write.table(zero,file=paste0('./data/tcgant_0413_preprocess_zero',i,'.txt'), sep='\t')
+  write.table(zero,file=paste0('./data/tcga_nt_0413_preprocess_zero',i,'.txt'), sep='\t')
   
   D=DEG(zero, feature)
   colnames(zero) == rownames(feature)
@@ -124,12 +124,12 @@ for (i in c(1)){
   vst=as.data.frame(D[2]) #test
   colnames(vst) = colnames(n_t)
   dim(vst)
-  write.table(vst, file=paste0('./data/tcgant_0413_for_heatmap_',i,'.txt'), sep='\t')
+  write.table(vst, file=paste0('./data/tcga_nt_0413_for_heatmap_',i,'.txt'), sep='\t')
   
-  write.table(res_na,file=paste0('./data/tcgant_0413_res_',i,'.txt'), sep='\t')
+  write.table(res_na,file=paste0('./data/tcga_nt_0413_res_',i,'.txt'), sep='\t')
   
   final_res=res_na[res_na$pvalue<0.05 & abs(res_na$log2FoldChange)>=1.5,]
-  write.table(final_res, file= paste0('./data/tcgant_0413_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(final_res, file= paste0('./data/tcga_nt_0413_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
   
   up_final_res = final_res[final_res$log2FoldChange >=1.5,]
   down_final_res = final_res[final_res$log2FoldChange <=-1.5,]
@@ -141,20 +141,20 @@ for (i in c(1)){
   print(dim(down_final_res))
   
   
-  write.table(up_final_res, file= paste0('./data/tcgant_0413_up_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
-  write.table(down_final_res, file= paste0('./data/tcgant_0413_down_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(up_final_res, file= paste0('./data/tcga_nt_0413_up_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(down_final_res, file= paste0('./data/tcga_nt_0413_down_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
   
   if (nrow(up_final_res) >=25 && nrow(down_final_res) >=25){
     up_final_res=up_final_res[order(-up_final_res$log2FoldChange),]
     print(head(up_final_res))
     top_25_gene = rownames(up_final_res[1:25,])
-    write.table(rownames(up_final_res[1:30,]), file= paste0('./data/tcgant_0413_up_30_',i,'.txt'), sep='\t')
+    write.table(rownames(up_final_res[1:30,]), file= paste0('./data/tcga_nt_0413_up_30_',i,'.txt'), sep='\t')
     
     down_final_res=down_final_res[order(down_final_res$log2FoldChange),]
     print(head(down_final_res))
     bottom_25_gene = rownames(down_final_res[1:25,])
     
-    write.table(rownames(down_final_res[1:30,]), file= paste0('./data/tcgant_0413_down_30_',i,'.txt'), sep='\t')
+    write.table(rownames(down_final_res[1:30,]), file= paste0('./data/tcga_nt_0413_down_30_',i,'.txt'), sep='\t')
   }
   else{
     print('니가 해')
@@ -203,8 +203,30 @@ dim(nr_f)#38662 111
 nr_p =f_pdata[c(n_sample,r_sample),]
 table(rownames(nr_p)==colnames(nr_f))#all true 110
 nr_p$n_vs_p_vs_r_group
+preprocess_deg <- function(zero_threshold, count){
+  
+  cnt.zero = rowSums(count == 0)
+  
+  threshold = round(ncol(count)*zero_threshold)
+  message('threshold is ')
+  print(threshold)
+  
+  zero_count = count[which(cnt.zero < threshold),]
+  message('zero_count_dim is')
+  print(dim(zero_count))
+  
+  type = c(rep('n',52),rep('r',59))
+  sample =colnames(zero_count)
+  
+  feature = as.data.frame(cbind(sample,type))
+  rownames(feature) = sample
+  
+  col=colnames(zero_count)
+  
+  return(list(zero_count, feature, col))
+}
 
-for (i in c(1)){ 
+for (i in c(0.1,0.3,0.5,1)){ 
   R = preprocess_deg(i, nr_f)
   colnames(nr_f)
   zero = as.data.frame(R[1])

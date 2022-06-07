@@ -41,7 +41,7 @@ preprocess_deg <- function(zero_threshold, count){
   feature = as.data.frame(cbind(sample,type))
   rownames(feature) = sample
   
-  return(list(zero_count, feature, col))
+  return(list(zero_count, feature, sample))
 }
 library(DESeq2)
 DEG <- function(zero_count, coldata){
@@ -67,7 +67,7 @@ DEG <- function(zero_count, coldata){
   return(list(res_na, vst))
 }
 
-for (i in c(0.1,0.3,0.5,1)){ 
+for (i in c(1)){ 
   R = preprocess_deg(i, f_merge_gene_89)
   colnames(f_merge_gene_89)
   zero = as.data.frame(R[1])

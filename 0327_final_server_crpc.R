@@ -1,20 +1,10 @@
-data("GTEX_54_selected") #sample로 저장
-data("f_merge_gene") #f_merge_gene으로 저장
+data("GTEX_47_selected") #sample로 저장
+data("f_merge_gene_78") #f_merge_gene으로 저장
 
-dim(f_merge_gene)#36506 984 biomart로 gene symbol로 바꿔 놓기만 한 상태
-head(f_merge_gene)
+dim(f_merge_gene_78)#36506 78
+head(f_merge_gene_78)
 
-T_sample = colnames(f_merge_gene)[1:36]
-
-#미래에서 왔다 normal에서 하나느 제거 한다 u3zg
-sample[25]
-sample=sample[-25]
-
-f_merge_gene_89 = f_merge_gene[, c(T_sample,sample)]
-
-dim(f_merge_gene_89)#36506 89
-
-cnt.zero = rowSums(f_merge_gene_89==0)
+cnt.zero = rowSums(f_merge_gene_78==0)
 table(cnt.zero)
 hist(cnt.zero)
 
@@ -35,7 +25,7 @@ preprocess_deg <- function(zero_threshold, count){
   message('zero_count_dim is')
   print(dim(zero_count))
   
-  type = c(rep('T',36),rep('N',53))
+  type = c(rep('T',31),rep('N',47))
   sample =colnames(zero_count)
   
   feature = as.data.frame(cbind(sample,type))
@@ -43,6 +33,7 @@ preprocess_deg <- function(zero_threshold, count){
   
   return(list(zero_count, feature, sample))
 }
+
 library(DESeq2)
 DEG <- function(zero_count, coldata){
   dds <-DESeqDataSetFromMatrix(countData = round(zero_count),
@@ -67,9 +58,9 @@ DEG <- function(zero_count, coldata){
   return(list(res_na, vst))
 }
 
-for (i in c(1)){ 
-  R = preprocess_deg(i, f_merge_gene_89)
-  colnames(f_merge_gene_89)
+for (i in c(0.1,0.3,0.5,1)){ 
+  R = preprocess_deg(i, f_merge_gene_78)
+  colnames(f_merge_gene_78)
   zero = as.data.frame(R[1])
   
   col = as.data.frame(R[3])
@@ -78,7 +69,7 @@ for (i in c(1)){
   
   feature= as.data.frame(R[2])
   
-  write.table(zero,file=paste0('./data/89_F0405_preprocess_zero',i,'.txt'), sep='\t')
+  write.table(zero,file=paste0('./data/78_F0610_preprocess_zero',i,'.txt'), sep='\t')
   
   D=DEG(zero, feature)
   colnames(zero) == rownames(feature)
@@ -86,12 +77,12 @@ for (i in c(1)){
   vst=as.data.frame(D[2]) #test
   colnames(vst) = col$c..01_expected_count....04_expected_count....08_expected_count...
   dim(vst)
-  write.table(vst, file=paste0('./data/89_F0405_for_heatmap_',i,'.txt'), sep='\t')
+  write.table(vst, file=paste0('./data/78_F0610_for_heatmap_',i,'.txt'), sep='\t')
   
-  write.table(res_na,file=paste0('./data/89_F0405_res_',i,'.txt'), sep='\t')
+  write.table(res_na,file=paste0('./data/78_F0610_res_',i,'.txt'), sep='\t')
   
   final_res=res_na[res_na$pvalue<0.05 & abs(res_na$log2FoldChange)>=1.5,]
-  write.table(final_res, file= paste0('./data/89_F0405_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(final_res, file= paste0('./data/78_F0610_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
   
   up_final_res = final_res[final_res$log2FoldChange >=1.5,]
   down_final_res = final_res[final_res$log2FoldChange <=-1.5,]
@@ -103,20 +94,20 @@ for (i in c(1)){
   print(dim(down_final_res))
   
   
-  write.table(up_final_res, file= paste0('./data/89_F0405_up_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
-  write.table(down_final_res, file= paste0('./data/89_F0405_down_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(up_final_res, file= paste0('./data/78_F0610_up_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
+  write.table(down_final_res, file= paste0('./data/78_F0610_down_res_',i,'_p0.05_log2_1.5.txt'), sep='\t')
   
   if (nrow(up_final_res) >=25 && nrow(down_final_res) >=25){
     up_final_res=up_final_res[order(-up_final_res$log2FoldChange),]
     print(head(up_final_res))
     top_25_gene = rownames(up_final_res[1:25,])
-    write.table(rownames(up_final_res[1:30,]), file= paste0('./data/89_F0405_up_30_',i,'.txt'), sep='\t')
+    write.table(rownames(up_final_res[1:30,]), file= paste0('./data/78_F0610_up_30_',i,'.txt'), sep='\t')
     
     down_final_res=down_final_res[order(down_final_res$log2FoldChange),]
     print(head(down_final_res))
     bottom_25_gene = rownames(down_final_res[1:25,])
     
-    write.table(rownames(down_final_res[1:30,]), file= paste0('./data/89_F0405_down_30_',i,'.txt'), sep='\t')
+    write.table(rownames(down_final_res[1:30,]), file= paste0('./data/78_F0610_down_30_',i,'.txt'), sep='\t')
   }
   else{
     print('니가 해')
@@ -138,19 +129,18 @@ plot_0.3 =get('final_50_genes_0.3')
 plot_0.5 =get('final_50_genes_0.5')
 plot_1 =get('final_50_genes_1')
 
-vst = apply(vst,1,as.numeric)
-hist(vst)
-boxplot(vst)
-memory.limit(1000000)
 
 anno = as.data.frame(feature[,'type'])
 rownames(anno) = rownames(feature)
 colnames(anno)[1] = 'type'
 
-range(plot_0.1)
+vst = read.table('./data/78_F0610_for_heatmap_0.3.txt')
+hist(apply(vst,1,as.numeric))
+
+range(plot_0.3)
 library(pheatmap)
-pheatmap(plot_1, cluster_rows = F, cluster_cols = F, annotation_col=anno,
-         breaks=seq(-3,3,length.out=100), show_colnames = F)
+pheatmap(plot_0.3, cluster_rows = F, cluster_cols = F, annotation_col=anno,
+         breaks=seq(-1,1,length.out=100), show_colnames = F)
 
 
 
